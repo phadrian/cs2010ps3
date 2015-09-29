@@ -3,8 +3,8 @@
 import java.util.*;
 import java.io.*;
 
-// write your matric number here:
-// write your name here:
+// write your matric number here: A0124123Y
+// write your name here: Adrian Pheh
 // write list of collaborators here:
 // year 2015 hash code: JESg5svjYpIsmHmIjabX (do NOT delete this line)
 
@@ -100,14 +100,15 @@ class HospitalTour {
         }
     }
 
-    public int[][] duplicateMatrix(int[][] matrix) {
-        int[][] newMatrix = new int[matrix.length][matrix.length];
-        for (int i = 0; i < matrix.length; i++) {
-            for (int j = 0; j < matrix.length; j++) {
-                newMatrix[i][j] = matrix[i][j];
-            }
-        }
-        return newMatrix;
+    public ArrayList<ArrayList<Integer>> duplicateList(ArrayList<ArrayList<Integer>> list) {
+    	ArrayList<ArrayList<Integer>> newList = new ArrayList<ArrayList<Integer>>();
+    	for (int i = 0; i < list.size(); i++) {
+    		newList.add(new ArrayList<Integer>());
+    		for (int j = 0; j < list.get(i).size(); j++) {
+    			newList.get(i).add(list.get(i).get(j));
+    		}
+    	}
+    	return newList;
     }
 
     public boolean isStillConnected(int[] original, int[] visited, int deletedVertex) {
@@ -135,30 +136,19 @@ class HospitalTour {
             // Run a loop through every vertex
             for (int i = 0; i < V; i++) {
             	// Make a temporary copy to do deletions
-            	ArrayList<ArrayList<Integer>> tempList = 
-            			(ArrayList<ArrayList<Integer>>)adjList.clone();
-                // For every value of i, remove this value from the Adjacency List
-                // and keep it in a temporary variable
-                for (int j = 0; j < tempList.size(); j++) {
-                	if (i == j) {
-                		// Delete the vertex
-                		tempList.remove(i);
-                	} else {
-                		// Loop through the connected vertices and delete
-                		for (int l = 0; l < tempList.get(j).size(); l++) {
-                			if (tempList.get(j).get(l) == i) {
-                				tempList.get(j).remove(l);
-                			}
-                		}
-                	}
-                }
+            	ArrayList<ArrayList<Integer>> tempList = duplicateList(adjList);
+            	
+            	// Loop through the adjList and delete all instances of i
+            	for (int j = 0; j < tempList.size(); j++) {
+            		tempList.get(j).remove(new Integer(i));
+            	}
+                
                 initArrays();
                 if (i == 0) {
                     DFS(tempList, 1);
                 } else {
                     DFS(tempList, i - 1);
                 }
-
                 if (!isStillConnected(originalVisited, visited, i)) {
                     articulationPoints.add(i);
                 }
@@ -168,14 +158,22 @@ class HospitalTour {
         return articulationPoints;
     }
 
-    public void printMatrix(int[][] matrix) {
-        for (int i = 0; i < V; i++) {
-            for (int j = 0; j < V; j++) {
-                System.out.print(matrix[i][j] + " ");
+    public void printList(ArrayList<ArrayList<Integer>> list) {
+        for (int i = 0; i < list.size(); i++) {
+            for (int j = 0; j < list.get(i).size(); j++) {
+                System.out.print(list.get(i).get(j) + " ");
             }
             System.out.print('\n');
         }
         System.out.println('\n');
+    }
+    
+    public void printArray(int[] array) {
+    	System.out.print("[");
+    	for (int i = 0; i < array.length - 1; i++) {
+    		System.out.print(array[i] + ",");
+    	}
+    	System.out.println(array[array.length - 1] + "]");
     }
 
     // --------------------------------------------
