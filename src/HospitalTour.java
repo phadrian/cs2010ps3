@@ -17,6 +17,7 @@ class HospitalTour {
     // is accessible to all methods in this class
     private int[] visited;
     private int[] parent;
+    private ArrayList<ArrayList<Integer>> adjList;
 
     public HospitalTour() {
         // Write necessary code during construction
@@ -39,6 +40,7 @@ class HospitalTour {
         // Initialize all values of visited to be zero and parent to be -1
         visited = new int[V];
         parent = new int[V];
+        adjList = convertToAdjList(AdjMatrix);
 
         ans = getLowestRating(getArticulationPoints());
 
@@ -48,15 +50,31 @@ class HospitalTour {
     // You can add extra function if needed
     // --------------------------------------------
 
-    public void DFS(int[][] matrix, int vertex) {
+    public ArrayList<ArrayList<Integer>> convertToAdjList(int[][] matrix) {
+    	// Initialize the ArrayList
+    	ArrayList<ArrayList<Integer>> adjList = new ArrayList<ArrayList<Integer>>();
+    	for (int i = 0; i < matrix.length; i++) {
+    		adjList.add(new ArrayList<Integer>());
+    	}
+    	
+    	for (int i = 0; i < matrix.length; i++) {
+    		for (int j = 0; j < matrix.length; j++) {
+    			if (matrix[i][j] == 1) {
+    				adjList.get(i).add(j);
+    			}
+    		}
+    	}
+    	return adjList;
+    }
+    
+    public void DFS(ArrayList<ArrayList<Integer>> adjList, int vertex) {
         visited[vertex] = 1;
-        for (int i = 0; i < V; i++) {
-            if (matrix[vertex][i] == 1) {
-                if (visited[i] == 0) {
-                    parent[i] = vertex;
-                    DFS(matrix, i);
-                }
-            }
+        for (int i = 0; i < adjList.get(vertex).size(); i++) {
+        	int nextVertex = adjList.get(vertex).get(i);
+        	if (visited[nextVertex] == 0) {
+        		parent[nextVertex] = vertex;
+        		DFS(adjList, nextVertex);
+        	}
         }
     }
 
@@ -107,7 +125,7 @@ class HospitalTour {
 
         if (V != 1) {
             // Run a preliminary DFS to get the connected graph in visited
-            DFS(AdjMatrix, 0);
+            DFS(adjList, 0);
 
             int originalVisited[] = new int[V];
             for (int i = 0; i < V; i++) {
@@ -116,26 +134,29 @@ class HospitalTour {
 
             // Run a loop through every vertex
             for (int i = 0; i < V; i++) {
-                // Make a temporary copy to do deletions
-                int[][] tempMatrix = duplicateMatrix(AdjMatrix);
-                // For every value of i, remove this value from the Adjacency Matrix
+            	// Make a temporary copy to do deletions
+            	ArrayList<ArrayList<Integer>> tempList = 
+            			(ArrayList<ArrayList<Integer>>)adjList.clone();
+                // For every value of i, remove this value from the Adjacency List
                 // and keep it in a temporary variable
-                for (int j = 0; j < V; j++) {
-                    if (j == i) {
-                        // Replace the entire ith row with 0
-                        for (int l = 0; l < V; l++) {
-                            tempMatrix[i][l] = 0;
-                        }
-                    } else {
-                        // Replace just the ith column
-                        tempMatrix[j][i] = 0;
-                    }
+                for (int j = 0; j < tempList.size(); j++) {
+                	if (i == j) {
+                		// Delete the vertex
+                		tempList.remove(i);
+                	} else {
+                		// Loop through the connected vertices and delete
+                		for (int l = 0; l < tempList.get(j).size(); l++) {
+                			if (tempList.get(j).get(l) == i) {
+                				tempList.get(j).remove(l);
+                			}
+                		}
+                	}
                 }
                 initArrays();
                 if (i == 0) {
-                    DFS(tempMatrix, 1);
+                    DFS(tempList, 1);
                 } else {
-                    DFS(tempMatrix, i - 1);
+                    DFS(tempList, i - 1);
                 }
 
                 if (!isStillConnected(originalVisited, visited, i)) {
